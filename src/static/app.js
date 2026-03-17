@@ -34,6 +34,10 @@ document.addEventListener("DOMContentLoaded", () => {
     technology: { label: "Technology", color: "#e8eaf6", textColor: "#3949ab" },
   };
 
+  // App configuration
+  const SCHOOL_NAME = "Mergington High School";
+  const COPY_SUCCESS_DURATION_MS = 2000;
+
   // State for activities and filters
   let allActivities = {};
   let currentFilter = "all";
@@ -569,6 +573,12 @@ document.addEventListener("DOMContentLoaded", () => {
         `
         }
       </div>
+      <div class="share-section">
+        <span class="share-label">Share:</span>
+        <button class="share-button share-twitter" data-activity="${name}" aria-label="Share on X (Twitter)">𝕏</button>
+        <button class="share-button share-facebook" data-activity="${name}" aria-label="Share on Facebook">f</button>
+        <button class="share-button share-copy" data-activity="${name}" aria-label="Copy link">🔗</button>
+      </div>
     `;
 
     // Add click handlers for delete buttons
@@ -587,7 +597,45 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+    // Add click handlers for share buttons
+    activityCard.querySelector(".share-twitter").addEventListener("click", () => {
+      shareActivity("twitter", name, details.description, formattedSchedule);
+    });
+    activityCard.querySelector(".share-facebook").addEventListener("click", () => {
+      shareActivity("facebook", name, details.description, formattedSchedule);
+    });
+    activityCard.querySelector(".share-copy").addEventListener("click", (e) => {
+      shareActivity("copy", name, details.description, formattedSchedule, e.currentTarget);
+    });
+
     activitiesList.appendChild(activityCard);
+  }
+
+  // Function to share an activity on social media or copy the link
+  function shareActivity(platform, name, description, schedule, buttonEl) {
+    const pageUrl = window.location.origin + window.location.pathname;
+    const activityUrl = `${pageUrl}?activity=${encodeURIComponent(name)}`;
+    const shareText = `Check out "${name}" at ${SCHOOL_NAME}! ${description} Schedule: ${schedule}`;
+
+    if (platform === "twitter") {
+      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(activityUrl)}`;
+      window.open(twitterUrl, "_blank", "noopener,noreferrer");
+    } else if (platform === "facebook") {
+      const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(activityUrl)}&quote=${encodeURIComponent(shareText)}`;
+      window.open(facebookUrl, "_blank", "noopener,noreferrer");
+    } else if (platform === "copy") {
+      navigator.clipboard.writeText(activityUrl).then(() => {
+        const original = buttonEl.textContent;
+        buttonEl.textContent = "✓";
+        buttonEl.classList.add("share-copy-success");
+        setTimeout(() => {
+          buttonEl.textContent = original;
+          buttonEl.classList.remove("share-copy-success");
+        }, COPY_SUCCESS_DURATION_MS);
+      }).catch(() => {
+        showMessage("Could not copy link. Please copy the URL manually.", "error");
+      });
+    }
   }
 
   // Event listeners for search and filter
