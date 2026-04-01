@@ -913,4 +913,23 @@ document.addEventListener("DOMContentLoaded", () => {
   checkAuthentication();
   initializeFilters();
   fetchActivities();
+
+  // Dark mode toggle
+  const darkModeToggle = document.getElementById("dark-mode-toggle");
+  const darkModeIcon = document.getElementById("dark-mode-icon");
+
+  function applyDarkMode(isDark) {
+    document.body.classList.toggle("dark-mode", isDark);
+    darkModeIcon.textContent = isDark ? "☀️" : "🌙";
+  }
+
+  // Restore saved preference
+  const savedDarkMode = localStorage.getItem("darkMode") === "true";
+  applyDarkMode(savedDarkMode);
+
+  darkModeToggle.addEventListener("click", () => {
+    const isDark = !document.body.classList.contains("dark-mode");
+    applyDarkMode(isDark);
+    localStorage.setItem("darkMode", isDark);
+  });
 });
